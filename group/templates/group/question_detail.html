@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+
+{% block title %}
+	{{ group.name }}
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-8 col-sm-12">
+			<h1 class="py-3 px-2 bg-dark text-light d-flex justify-content-between">Questions <a href="{% url 'group:create_question' group.id %}"><i class="fas fa-plus text-light"></i></a></h1>
+			<div class="container bg-grey">
+					<div class=" my-4 card" style="box-shadow: #484646 0px 4px 1px">
+						<div class="card-body">
+							<div class="card-title text-right">
+								{% if question.user == request.user %}
+									<strong>Me</strong>
+								{% else %}
+								<strong>
+									<a class='text-dark' href="{% url 'accounts:view-profile' question.user.username %}">{{ question.user.first_name }} {{ question.user.last_name }}</a>
+								</strong>
+								{% endif %}
+							</div>
+							<div class="card-text">
+								{{ question.text|markdown }}
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="d-flex justify-content-between">
+								<i>{{ question.posted_date }}</i>
+								<a class="btn btn-outline-dark">
+									<i class="fas fa-2x fa-comment"></i> <span class="badge badge-danger">{{ question.comments.count }}</span>
+								</a>
+							</div>
+							<div>
+								<div class="mt-2 card card-body">
+									{% for comment in question.comments.all %}
+                                        <h1>{{ comment.id }}</h1>
+										<code class="blockquote text-info border-bottom" style="font-size: 0.8rem">
+											{{ comment.text|markdown }}
+
+											<footer class="blockquote-footer">
+											{% if comment.user == user %}
+												Me
+											{% else %}
+												{{ comment.user.first_name }} {{ comment.user.last_name }}
+											{% endif %}
+												{{ comment.comment_date}}
+											</footer>
+										</code>
+									{% endfor %}
+									<form method="POST" action="{% url 'group:add_comment' question.id %}">
+										{% csrf_token %}
+										{% for field in comment_form %}
+											<div class="form-group">
+									            {% if field.errors %}
+									              <div class="alert alert-warningalert-dismissible fade show" role='alert'>
+									                {{ field.errors }}
+									                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									                  <span aria-hidden="true">&times;</span>
+									                </button>
+									              </div>
+									            {% endif %}
+
+									            {{ field.label_tag }}
+									            {{ field|add_class:'form-control' }}
+									        </div>
+									    {% endfor %}
+										<input type="submit" value="post" class="btn btn-outline-primary">
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+		    <a href="{% url 'group:group_page' group.name group.id %}">
+		        <h3 class="py-3 px-2 bg-dark text-light text-right">{{ group.name }}</h3>
+			</a>
+			{% include 'group/group_profile.html' %}
+		</div>
+	</div>
+{% endblock %}

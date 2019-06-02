@@ -1,0 +1,19 @@
+<div class="card">
+	{% if group.picture %}
+		<img class="card-img-top" src='{{ group.picture.url }}'>
+	{% else %}
+		<div class="container mt-1 text-center"><i class="fas fa-9x  fa-fw fa-users"></i></div>
+	{% endif %}
+	<ul class="list-group list-group-flush">
+		<li class="list-group-item"><strong><i class="fa fa-fw fa-users"></i></strong> {{ group.name }}</li>
+        <li class="list-group-item"><strong></strong> {{ group.about }}</li>
+        <li class="list-group-item"><strong><i class="fa fa-fw fa-user"></i></strong><a href="{% url 'accounts:view-profile' group.created_by.username %}"> {{ group.created_by }}</a></li>
+		<li class="list-group-item"><strong><i class="fa fa-fw fa-globe"></i></strong><a href="{% url 'group:group_page' group.name group.id %}">http://127.0.0.1:8000{% url 'group:group_page' group.name group.id %}</a></li>
+		<li class="list-group-item"><strong><i class="fa fa-fw  fa-sort-numeric-up"></i></strong> There are {{ group.members.count }} members</li>
+	</ul>
+	{% if request.user == group.created_by %}
+		<div class="card-body">
+			<a href="{% url 'group:edit_group' group.id %}" class="card-link btn btn-danger">Edit Group</a>
+		</div>
+	{% endif %}
+</div>

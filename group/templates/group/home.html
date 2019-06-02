@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+
+{% block title %}
+	Feeds
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-8 col-sm-12">
+			<h1 class="py-2 px-2 bg-dark text-light d-flex justify-content-between">Latest Questions from Groups <a href="{% url 'group:create_group' %}"><i class="fas fa-plus text-light"></i></a></h1>
+			<div class="container bg-grey">
+                {% for group in request.user.group_set.all %}
+					<div class=" my-4 card" style="box-shadow: #484646 0px 4px 1px">
+                        <div class="bg-grey text-dark text-capitalize text-center">
+                            <a  class="text-dark" style="font-size: 16pt;" href="{% url 'group:group_page' group.name group.id %}">{{ group.name }}</a>
+                        </div>
+
+                        {% if not group.questions.all %}
+                            <div class="card-body">
+                                <h3> There are no questions yet in this group</h3>
+                            </div>
+                        {% endif %}
+
+                        {% for question in group.latest_questions %}
+                            <div class="card-body row">
+                                <div class="col-2">
+                                    {% if question.user == request.user %}
+                                        <strong>Me</strong>
+                                    {% else %}
+                                        <strong>
+                                            <a class='text-dark' href="{% url 'accounts:view-profile' question.user.username %}">{{ question.user.first_name }} {{ question.user.last_name }}</a>
+                                        </strong>
+                                    {% endif %}
+                                </div>
+                                <div class="card-text col float-left">
+                                    {{ question.text|markdown }}
+                                </div>
+                                <a href="{% url 'group:question_detail' question.id %}">Details</a>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <i>{{ question.posted_date }}</i>
+                                    <a class="btn btn-outline-dark" data-toggle='collapse' href="#comments{{ question.id }}" role="button"  aria-expanded="false" aria-controls="comments{{ question.id }}">
+                                        <i class="fas fa-2x fa-comment"></i> <span class="badge badge-danger">{{ question.comments.count }}</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="collapse" id="comments{{ question.id }}">
+								<div class="mt-2 card card-body">
+									{% for comment in question.comments.all %}
+										<code class="blockquote text-info border-bottom" style="font-size: 0.8rem">
+											{{ comment.text|markdown }}
+
+											<footer class="blockquote-footer">
+											{% if comment.user == user %}
+												Me
+											{% else %}
+												{{ comment.user.first_name }} {{ comment.user.last_name }}
+											{% endif %}
+												{{ comment.comment_date}}
+											</footer>
+										</code>
+									{% endfor %}
+									<form method="POST" action="{% url 'group:add_comment' question.id %}">
+										{% csrf_token %}
+										{% for field in comment_form %}
+											<div class="form-group">
+									            {% if field.errors %}
+									              <div class="alert alert-warningalert-dismissible fade show" role='alert'>
+									                {{ field.errors }}
+									                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									                  <span aria-hidden="true">&times;</span>
+									                </button>
+									              </div>
+									            {% endif %}
+
+									            {{ field.label_tag }}
+									            {{ field|add_class:'form-control' }}
+									        </div>
+									    {% endfor %}
+										<input type="submit" value="comment" class="btn btn-outline-primary">
+									</form>
+								</div>
+							</div>
+                        {% endfor %}
+					</div>
+                {% endfor %}
+			</div>
+		</div>
+		<div class="col-md-4">
+			<h3 class="py-3 px-2 bg-dark text-light text-right">Me</h3>
+			{% include 'accounts/profile.html' %}
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	Group list
+{% endblock %}
+
+{% block content %}
+
+	<div class="row">
+		<div class="col-md-8 col-sm-12">
+			<h1 class="py-3 px-2 bg-dark text-light">Following</h1>
+			<div class="container ">
+				{% for group in user_groups %}
+					<div class="my-4 border-top py-2">
+						<div class="row">
+
+							<div class="col-md-2 text-center text-capitalize">
+								<a href="{% url 'group:group_page' group.name group.id %}" class="text-capitalize" style="text-decoration: underline;">{{ group.name }}</a>
+							</div>
+                            <div class="col-md-10">
+								<div class="h-100 w-100 d-flex align-items-center justify-items-center">
+                                    <div class="col">{{ group.about }}</div>
+									 <a class="mx-2 btn btn-light" style="float: right;" href="{% url 'group:group_unfollow' group.id %}"> Unfollow <i class="fas fa-user-cogs"></i></a>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+			<h3 class="py-3 px-2 bg-dark text-light">Follow Groups</h3>
+				<div class="container">
+					{% for group in unfollowed_groups %}
+						<div class="my-4 border-top py-2">
+							<div class="row">
+								<div class="col-md-2 text-center">
+                                    <p class="text-capitalize">{{ group.name }}</p>
+								</div>
+								<div class="col-md-10">
+									<div class="h-100 w-100 d-flex align-items-center justify-items-center">
+                                        <div class=" col">{{ group.about }}</div>
+										<a class="btn btn-dark mx-3 " href="{% url 'group:group_follow' group.id %}"><i class="fas fa-user-plus"></i></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+        </div>
+        <div class="col-md-4">
+            <h3 class="py-3 px-2 bg-dark text-light text-right">Me</h3>
+            {% include 'accounts/profile.html' %}
+        </div>
+	</div>
+{% endblock %}

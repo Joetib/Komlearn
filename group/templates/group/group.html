@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+
+{% block title %}
+	{{ group.name }}
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-8 col-sm-12">
+			<h1 class="py-3 px-2 bg-dark text-light d-flex justify-content-between">Questions <a href="{% url 'group:create_question' group.id %}"><i class="fas fa-plus text-light"></i></a></h1>
+			<div class="container bg-grey">
+				{% for question in questions %}
+					<div class=" my-4 card" style="box-shadow: #484646 0px 4px 1px">
+						<div class="card-body">
+							<div class="card-title text-right">
+								{% if question.user == request.user %}
+									<strong>Me</strong>
+								{% else %}
+								<strong>
+									<a class='text-dark' href="{% url 'accounts:view-profile' question.user.username %}">{{ question.user.first_name }} {{ question.user.last_name }}</a>
+								</strong>
+								{% endif %}
+							</div>
+                            <a class="card-link" href="{% url 'group:question_detail' question.id %}">
+                                <div class="card-text text-dark">
+                                    {{ question.text|markdown }}
+                                </div>
+                            </a>
+                            <div class="card-link card-text">
+                                <a class="card-link" href="{% url 'group:question_detail' question.id %}">
+                                <div class="card-text text-dark">
+                                    details
+                                </div>
+                            </a>
+                            </div>
+						</div>
+						<div class="card-footer">
+							<div class="d-flex justify-content-between">
+								<i>{{ question.posted_date }}</i>
+								<a class="btn btn-outline-dark" data-toggle='collapse' href="#comments{{ question.id }}" role="button"  aria-expanded="false" aria-controls="comments{{ question.id }}">
+									<i class="fas fa-2x fa-comment"></i> <span class="badge badge-danger">{{ question.comments.count }}</span>
+								</a>
+							</div>
+							<div class="collapse" id="comments{{ question.id }}">
+								<div class="mt-2 card card-body">
+									{% for comment in question.comments.all %}
+										<code class="blockquote text-info border-bottom" style="font-size: 0.8rem">
+											{{ comment.text|markdown }}
+
+											<footer class="blockquote-footer">
+											{% if comment.user == user %}
+												Me
+											{% else %}
+												{{ comment.user.first_name }} {{ comment.user.last_name }}
+											{% endif %}
+												{{ comment.comment_date}}
+											</footer>
+										</code>
+									{% endfor %}
+									<form method="POST" action="{% url 'group:add_comment' question.id %}">
+										{% csrf_token %}
+										{% for field in comment_form %}
+											<div class="form-group">
+									            {% if field.errors %}
+									              <div class="alert alert-warningalert-dismissible fade show" role='alert'>
+									                {{ field.errors }}
+									                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									                  <span aria-hidden="true">&times;</span>
+									                </button>
+									              </div>
+									            {% endif %}
+
+									            {{ field.label_tag }}
+									            {{ field|add_class:'form-control' }}
+									        </div>
+									    {% endfor %}
+										<input type="submit" value="post" class="btn btn-outline-primary">
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+			<div class="pagination align-content-center">
+                <span class="step-links">
+                    {% if questions.has_previous %}
+                        <span>
+                            <a class="btn card-link btn-info" href="?page=1">&laquo; first</a>
+                            <a class="btn card-link btn-info" href="?page={{ questions.previous_page_number }}">previous</a>
+                        </span>
+                    {% endif %}
+                    <span class="pagination-lg"> Page {{ questions.number }} of {{ questions.paginator.num_pages }}. </span>
+                    {% if questions.has_next %}
+                        <span>
+                            <a class="btn card-link btn-info" href="?page={{ questions.next_page_number }}">next</a>
+                            <a class="btn card-link btn-info" href="?page={{ questions.paginator.num_pages }}">last &raquo;</a>
+                        </span>
+                    {% endif %}
+
+                    </span>
+            </div>
+		</div>
+		<div class="col-md-4">
+			<h3 class="py-3 px-2 bg-dark text-light text-right">{{ group.name }}</h3>
+			{% include 'group/group_profile.html' %}
+		</div>
+	</div>
+{% endblock %}
